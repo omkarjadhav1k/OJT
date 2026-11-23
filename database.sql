@@ -14,3 +14,19 @@ CREATE TABLE customers (
     customer_address TEXT
     
 );
+CREATE TABLE sales(
+    sale_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    product_id INT,
+    quantity INT NOT NULL,
+    price DECIMAL(10,2)NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    sale_date TIMESTAMP DEFAULT
+    CURRENT_TIMESTAMP,
+    payment_status ENUM('Paid','Pending')
+    DEFAULT 'Pending',
+    FOREIGN KEY (customer_id) REFERENCES 
+    customer(customer_id),
+    FOREIGN KEY (product_id) REFERENCES
+    product(product_id),
+);
