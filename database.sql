@@ -26,7 +26,7 @@ CREATE TABLE sales(
     payment_status ENUM('Paid','Pending')
     DEFAULT 'Pending',
     FOREIGN KEY (customer_id) REFERENCES 
-    customer(customer_id),
+    customers(customer_id),
     FOREIGN KEY (product_id) REFERENCES
-    product(product_id),
+    products(product_id)
 );
