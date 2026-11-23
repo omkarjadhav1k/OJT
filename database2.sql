@@ -15,6 +15,8 @@ CREATE TABLE orders(
  order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
  total_amount DECIMAL(10,2) NOT NULL,
  payment_method ENUM('Cash','UPI','Card')DEFAULT
+ 'Cash',
+ payment_status ENUM('pending','paid','Failed')DEFAULT
  'Pending',
  order_status ENUM('Pending','Processing','Completed','Cancelled')DEFAULT'Pending'
 
@@ -52,4 +54,3 @@ CREATE TABLE products (
 
 
 
-)
