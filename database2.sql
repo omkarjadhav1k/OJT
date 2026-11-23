@@ -2,7 +2,7 @@ CREATE TABLE categories(
 ct_id INT AUTO_INCREMENT PRIMARY KEY,
 ct_name VARCHAR(100) NOT NULL UNIQUE,
 ct_description TEXT,
-ct_status ENUM('')
+ct_status ENUM('Available','Unavailable')DEFAULT'Available',
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 );
@@ -39,6 +39,12 @@ CREATE TABLE products (
  FOREIGN KEY (category_id) REFERENCES categories(id)
 
 );
+
+
+
+
+
+
 
 
 
