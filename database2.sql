@@ -25,3 +25,25 @@ customers(id)
 
 
 
+CREATE TABLE products (
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ product_name VARCHAR(100)NOT NULL,
+ category_id INT,
+ price DECIMAL(10,2) NOT NULL,
+ quantity INT NOT NULL DEFAULT 0,
+ description TEXT,
+ availibility ENUM('Available','Unavailable') DEFAULT
+ 'Available',
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+ FOREIGN KEY (category_id) REFERENCES categories(id)
+
+);
+
+
+
+
+
+
+
+)
