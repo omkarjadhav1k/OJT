@@ -20,7 +20,7 @@ CREATE TABLE users (
 
 CREATE TABLE customers (
     customer_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT DEFAULT NULL,
+    customer_id INT DEFAULT NULL,
     customer_name VARCHAR(100) NOT NULL,
     customer_phone VARCHAR(15) NOT NULL,
     customer_address TEXT,
