@@ -1,54 +1,67 @@
 <?php
-// app/Controllers/CategoryController.php
 
 class CategoryController {
-    private Category $model;
+    private $model;
 
     public function __construct() {
         $this->model = new Category();
     }
 
-    public function getAll(): void {
-        $categories = $this->model->getAll();
-        jsonResponse('success', 'Categories fetched successfully', $categories);
+    public function getAll() {
+        return $this->model->getAll();
     }
 
-    public function getById(int $id): void {
-        $category = $this->model->getById($id);
-        if (!$category) {
-            jsonResponse('error', 'Category not found', null, 404);
-        }
-        jsonResponse('success', 'Category details', $category);
+    public function getById($id) {
+        return $this->model->getById($id);
     }
 
-    public function create(): void {
-        $data = getRequestData();
-        if (empty($data['category_name'])) {
-            jsonResponse('error', 'Category name is required', null, 400);
-        }
+    public function create() {
+        $name   = trim($_POST['category_name'] ?? '');
+        $desc   = trim($_POST['category_description'] ?? '');
+        $status = $_POST['category_status'] ?? 'Active';
 
-        $desc = $data['category_description'] ?? null;
-        $status = $data['category_status'] ?? 'Active';
-        $id = $this->model->create($data['category_name'], $desc, $status);
-
-        jsonResponse('success', 'Category created successfully', ['category_id' => $id], 201);
-    }
-
-    public function update(int $id): void {
-        $data = getRequestData();
-        if (empty($data['category_name'])) {
-            jsonResponse('error', 'Category name is required', null, 400);
+        if ($name === '') {
+            return [
+                'success' => false,
+                'message' => 'Category name is required.'
+            ];
         }
 
-        $desc = $data['category_description'] ?? null;
-        $status = $data['category_status'] ?? 'Active';
-        $this->model->update($id, $data['category_name'], $desc, $status);
+        $id = $this->model->create($name, $desc, $status);
 
-        jsonResponse('success', 'Category updated successfully');
+        return [
+            'success'     => true,
+            'message'     => 'Category created successfully.',
+            'category_id' => $id
+        ];
     }
 
-    public function delete(int $id): void {
+    public function update($id) {
+        $name   = trim($_POST['category_name'] ?? '');
+        $desc   = trim($_POST['category_description'] ?? '');
+        $status = $_POST['category_status'] ?? 'Active';
+
+        if ($name === '') {
+            return [
+                'success' => false,
+                'message' => 'Category name is required.'
+            ];
+        }
+
+        $this->model->update($id, $name, $desc, $status);
+
+        return [
+            'success' => true,
+            'message' => 'Category updated successfully.'
+        ];
+    }
+
+    public function delete($id) {
         $this->model->delete($id);
-        jsonResponse('success', 'Category deleted successfully');
+
+        return [
+            'success' => true,
+            'message' => 'Category deleted successfully.'
+        ];
     }
 }

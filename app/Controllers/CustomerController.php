@@ -1,54 +1,69 @@
 <?php
-// app/Controllers/CustomerController.php
 
 class CustomerController {
-    private Customer $model;
+    private $model;
 
     public function __construct() {
         $this->model = new Customer();
     }
 
-    public function getAll(): void {
-        $customers = $this->model->getAll();
-        jsonResponse('success', 'Customers fetched successfully', $customers);
+    public function getAll() {
+        return $this->model->getAll();
     }
 
-    public function getById(int $id): void {
-        $customer = $this->model->getById($id);
-        if (!$customer) {
-            jsonResponse('error', 'Customer not found', null, 404);
-        }
-        jsonResponse('success', 'Customer details', $customer);
+    public function getById($id) {
+        return $this->model->getById($id);
     }
 
-    public function create(): void {
-        $data = getRequestData();
-        if (empty($data['customer_name']) || empty($data['customer_phone'])) {
-            jsonResponse('error', 'Customer name and phone are required', null, 400);
-        }
+    public function create() {
+        $userId  = !empty($_POST['user_id']) ? (int)$_POST['user_id'] : null;
+        $name    = trim($_POST['customer_name'] ?? '');
+        $phone   = trim($_POST['customer_phone'] ?? '');
+        $address = trim($_POST['customer_address'] ?? '');
 
-        $userId = !empty($data['user_id']) ? (int)$data['user_id'] : null;
-        $address = $data['customer_address'] ?? null;
-
-        $id = $this->model->create($userId, $data['customer_name'], $data['customer_phone'], $address);
-        jsonResponse('success', 'Customer added successfully', ['customer_id' => $id], 201);
-    }
-
-    public function update(int $id): void {
-        $data = getRequestData();
-        if (empty($data['customer_name']) || empty($data['customer_phone'])) {
-            jsonResponse('error', 'Customer name and phone are required', null, 400);
+        if ($name === '' || $phone === '') {
+            return [
+                'success' => false,
+                'message' => 'Customer name and phone are required.'
+            ];
         }
 
-        $userId = !empty($data['user_id']) ? (int)$data['user_id'] : null;
-        $address = $data['customer_address'] ?? null;
+        $id = $this->model->create($userId, $name, $phone, $address);
 
-        $this->model->update($id, $userId, $data['customer_name'], $data['customer_phone'], $address);
-        jsonResponse('success', 'Customer updated successfully');
+        return [
+            'success'     => true,
+            'message'     => 'Customer added successfully.',
+            'customer_id' => $id
+        ];
     }
 
-    public function delete(int $id): void {
+    public function update($id) {
+        $userId  = !empty($_POST['user_id']) ? (int)$_POST['user_id'] : null;
+        $name    = trim($_POST['customer_name'] ?? '');
+        $phone   = trim($_POST['customer_phone'] ?? '');
+        $address = trim($_POST['customer_address'] ?? '');
+
+        if ($name === '' || $phone === '') {
+            return [
+                'success' => false,
+                'message' => 'Customer name and phone are required.'
+            ];
+        }
+
+        $this->model->update($id, $userId, $name, $phone, $address);
+
+        return [
+            'success' => true,
+            'message' => 'Customer updated successfully.'
+        ];
+    }
+
+    public function delete($id) {
         $this->model->delete($id);
-        jsonResponse('success', 'Customer deleted successfully');
+
+        return [
+            'success' => true,
+            'message' => 'Customer deleted successfully.'
+        ];
     }
 }

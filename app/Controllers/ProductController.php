@@ -1,60 +1,73 @@
 <?php
-// app/Controllers/ProductController.php
 
 class ProductController {
-    private Product $model;
+    private $model;
 
     public function __construct() {
         $this->model = new Product();
     }
 
-    public function getAll(): void {
-        $products = $this->model->getAll();
-        jsonResponse('success', 'Products fetched successfully', $products);
+    public function getAll() {
+        return $this->model->getAll();
     }
 
-    public function getById(int $id): void {
-        $product = $this->model->getById($id);
-        if (!$product) {
-            jsonResponse('error', 'Product not found', null, 404);
-        }
-        jsonResponse('success', 'Product details', $product);
+    public function getById($id) {
+        return $this->model->getById($id);
     }
 
-    public function create(): void {
-        $data = getRequestData();
-        if (empty($data['product_name']) || !isset($data['price'])) {
-            jsonResponse('error', 'Product name and price are required', null, 400);
-        }
+    public function create() {
+        $name         = trim($_POST['product_name'] ?? '');
+        $categoryId   = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
+        $price        = $_POST['price'] ?? '';
+        $quantity     = (int)($_POST['quantity'] ?? 0);
+        $description  = trim($_POST['description'] ?? '');
+        $availability = $_POST['availability'] ?? 'Available';
 
-        $catId = !empty($data['category_id']) ? (int)$data['category_id'] : null;
-        $price = (float)$data['price'];
-        $qty = (int)($data['quantity'] ?? 0);
-        $desc = $data['description'] ?? null;
-        $avail = $data['availability'] ?? 'Available';
-
-        $id = $this->model->create($data['product_name'], $catId, $price, $qty, $desc, $avail);
-        jsonResponse('success', 'Product created successfully', ['product_id' => $id], 201);
-    }
-
-    public function update(int $id): void {
-        $data = getRequestData();
-        if (empty($data['product_name']) || !isset($data['price'])) {
-            jsonResponse('error', 'Product name and price are required', null, 400);
+        if ($name === '' || $price === '') {
+            return [
+                'success' => false,
+                'message' => 'Product name and price are required.'
+            ];
         }
 
-        $catId = !empty($data['category_id']) ? (int)$data['category_id'] : null;
-        $price = (float)$data['price'];
-        $qty = (int)($data['quantity'] ?? 0);
-        $desc = $data['description'] ?? null;
-        $avail = $data['availability'] ?? 'Available';
+        $id = $this->model->create($name, $categoryId, (float)$price, $quantity, $description, $availability);
 
-        $this->model->update($id, $data['product_name'], $catId, $price, $qty, $desc, $avail);
-        jsonResponse('success', 'Product updated successfully');
+        return [
+            'success'    => true,
+            'message'    => 'Product created successfully.',
+            'product_id' => $id
+        ];
     }
 
-    public function delete(int $id): void {
+    public function update($id) {
+        $name         = trim($_POST['product_name'] ?? '');
+        $categoryId   = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
+        $price        = $_POST['price'] ?? '';
+        $quantity     = (int)($_POST['quantity'] ?? 0);
+        $description  = trim($_POST['description'] ?? '');
+        $availability = $_POST['availability'] ?? 'Available';
+
+        if ($name === '' || $price === '') {
+            return [
+                'success' => false,
+                'message' => 'Product name and price are required.'
+            ];
+        }
+
+        $this->model->update($id, $name, $categoryId, (float)$price, $quantity, $description, $availability);
+
+        return [
+            'success' => true,
+            'message' => 'Product updated successfully.'
+        ];
+    }
+
+    public function delete($id) {
         $this->model->delete($id);
-        jsonResponse('success', 'Product deleted successfully');
+
+        return [
+            'success' => true,
+            'message' => 'Product deleted successfully.'
+        ];
     }
 }

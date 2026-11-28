@@ -1,58 +1,62 @@
 <?php
-// app/Controllers/SaleController.php
 
 class SaleController {
-    private Sale $saleModel;
-    private Product $productModel;
+    private $saleModel;
+    private $productModel;
 
     public function __construct() {
-        $this->saleModel = new Sale();
+        $this->saleModel    = new Sale();
         $this->productModel = new Product();
     }
 
-    public function getAll(): void {
-        $sales = $this->saleModel->getAll();
-        jsonResponse('success', 'Sales fetched successfully', $sales);
+    public function getAll() {
+        return $this->saleModel->getAll();
     }
 
-    public function getById(int $id): void {
-        $sale = $this->saleModel->getById($id);
-        if (!$sale) {
-            jsonResponse('error', 'Sale record not found', null, 404);
-        }
-        jsonResponse('success', 'Sale details', $sale);
+    public function getById($id) {
+        return $this->saleModel->getById($id);
     }
 
-    public function create(): void {
-        $data = getRequestData();
-        if (empty($data['product_id']) || empty($data['quantity']) || !isset($data['price'])) {
-            jsonResponse('error', 'Product ID, quantity, and price are required', null, 400);
+    public function create() {
+        $customerId    = !empty($_POST['customer_id']) ? (int)$_POST['customer_id'] : null;
+        $productId     = (int)($_POST['product_id'] ?? 0);
+        $quantity      = (int)($_POST['quantity'] ?? 0);
+        $price         = (float)($_POST['price'] ?? 0);
+        $totalAmount   = isset($_POST['total_amount']) ? (float)$_POST['total_amount'] : ($quantity * $price);
+        $paymentStatus = $_POST['payment_status'] ?? 'Paid';
+
+        if ($productId <= 0 || $quantity <= 0 || $price <= 0) {
+            return [
+                'success' => false,
+                'message' => 'Product, quantity, and price are required.'
+            ];
         }
 
-        $customerId    = !empty($data['customer_id']) ? (int)$data['customer_id'] : null;
-        $productId     = (int)$data['product_id'];
-        $qty           = (int)$data['quantity'];
-        $price         = (float)$data['price'];
-        $totalAmount   = isset($data['total_amount']) ? (float)$data['total_amount'] : ($qty * $price);
-        $paymentStatus = $data['payment_status'] ?? 'Paid';
-
-        // Check stock
         $product = $this->productModel->getById($productId);
-        if ($product && $product['quantity'] < $qty) {
-            jsonResponse('error', "Insufficient stock! Only {$product['quantity']} available.", null, 400);
+        if ($product && $product['quantity'] < $quantity) {
+            return [
+                'success' => false,
+                'message' => "Insufficient stock. Only {$product['quantity']} available."
+            ];
         }
 
-        $saleId = $this->saleModel->create($customerId, $productId, $qty, $price, $totalAmount, $paymentStatus);
-        $this->productModel->reduceStock($productId, $qty);
+        $saleId = $this->saleModel->create($customerId, $productId, $quantity, $price, $totalAmount, $paymentStatus);
+        $this->productModel->reduceStock($productId, $quantity);
 
-        jsonResponse('success', 'Sale recorded and stock updated successfully', [
+        return [
+            'success'      => true,
+            'message'      => 'Sale recorded and stock updated successfully.',
             'sale_id'      => $saleId,
             'total_amount' => $totalAmount
-        ], 201);
+        ];
     }
 
-    public function delete(int $id): void {
+    public function delete($id) {
         $this->saleModel->delete($id);
-        jsonResponse('success', 'Sale record deleted successfully');
+
+        return [
+            'success' => true,
+            'message' => 'Sale record deleted successfully.'
+        ];
     }
 }

@@ -1,37 +1,41 @@
 <?php
-// app/Models/Category.php
 
 class Category {
-    private PDO $db;
+    private $db;
 
     public function __construct() {
         $this->db = Database::connect();
     }
 
-    public function getAll(): array {
-        $stmt = $this->db->query("SELECT * FROM categories ORDER BY category_id DESC");
+    public function getAll() {
+        $sql = "SELECT * FROM categories ORDER BY category_id DESC";
+        $stmt = $this->db->query($sql);
         return $stmt->fetchAll();
     }
 
-    public function getById(int $id): ?array {
-        $stmt = $this->db->prepare("SELECT * FROM categories WHERE category_id = ?");
+    public function getById($id) {
+        $sql = "SELECT * FROM categories WHERE category_id = ?";
+        $stmt = $this->db->prepare($sql);
         $stmt->execute([$id]);
-        return $stmt->fetch() ?: null;
+        return $stmt->fetch();
     }
 
-    public function create(string $name, ?string $desc, string $status = 'Active'): int {
-        $stmt = $this->db->prepare("INSERT INTO categories (category_name, category_description, category_status) VALUES (?, ?, ?)");
-        $stmt->execute([$name, $desc, $status]);
-        return (int)$this->db->lastInsertId();
+    public function create($name, $description, $status = 'Active') {
+        $sql = "INSERT INTO categories (category_name, category_description, category_status) VALUES (?, ?, ?)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$name, $description, $status]);
+        return $this->db->lastInsertId();
     }
 
-    public function update(int $id, string $name, ?string $desc, string $status = 'Active'): bool {
-        $stmt = $this->db->prepare("UPDATE categories SET category_name = ?, category_description = ?, category_status = ? WHERE category_id = ?");
-        return $stmt->execute([$name, $desc, $status, $id]);
+    public function update($id, $name, $description, $status = 'Active') {
+        $sql = "UPDATE categories SET category_name = ?, category_description = ?, category_status = ? WHERE category_id = ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$name, $description, $status, $id]);
     }
 
-    public function delete(int $id): bool {
-        $stmt = $this->db->prepare("DELETE FROM categories WHERE category_id = ?");
+    public function delete($id) {
+        $sql = "DELETE FROM categories WHERE category_id = ?";
+        $stmt = $this->db->prepare($sql);
         return $stmt->execute([$id]);
     }
 }
